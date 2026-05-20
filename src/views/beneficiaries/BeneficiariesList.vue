@@ -1,3 +1,4 @@
+<!--src\views\beneficiaries\BeneficiariesList.vue-->
 <template>
   <div>
     <!-- رأس الصفحة: العنوان وزر الإضافة -->

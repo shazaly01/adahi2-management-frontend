@@ -128,6 +128,7 @@
         @print-single="printSingle"
         @print-bulk="printBulk"
         @edit-item="startEdit"
+        @delete-item="handleDeleteDistribution"
       />
     </div>
   </div>
@@ -311,6 +312,37 @@ const startEdit = (item) => {
   // حقن تفاصيل التوزيع في القسم الثاني
   if (distributionDetailsSectionRef.value) {
     distributionDetailsSectionRef.value.loadExistingDetails(item)
+  }
+}
+
+// --- دالة حذف سجل التوزيع وعكس الحركات ---
+const handleDeleteDistribution = async (item) => {
+  if (
+    !confirm(
+      `هل أنت متأكد من حذف الإيصال رقم #${item.receipt_number}؟ سيتم إلغاء العقد وإرجاع الكمية للمخزن.`,
+    )
+  ) {
+    return
+  }
+
+  try {
+    // 1. استدعاء دالة الحذف من الـ Service المحدثة
+    await distributionService.delete(item.id)
+
+    // 2. تحديث قائمة التوزيعات الأخيرة محلياً في الواجهة
+    recentDistributions.value = recentDistributions.value.filter((d) => d.id !== item.id)
+
+    toast.success(`تم حذف الإيصال رقم #${item.receipt_number} وعكس تأثيره المخزني بنجاح.`)
+
+    // 3. إعادة تحديث رصيد العهدة اللحظي بعد إرجاع الأضاحي للمخزن
+    await fetchRealTimeCustody()
+
+    // إذا كان السجل المحذوف مفتوحاً حالياً في وضع التعديل، قم بتصفير مساحة العمل
+    if (editingDistributionId.value === item.id) {
+      resetWorkspace()
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'فشل في إتمام عملية الحذف.')
   }
 }
 

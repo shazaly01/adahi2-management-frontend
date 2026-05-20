@@ -68,6 +68,22 @@ export const useDistributionStore = defineStore('distribution', () => {
     }
   }
 
+  async function deleteDistribution(id) {
+    loading.value = true
+    error.value = null
+    try {
+      await distributionService.delete(id)
+      // تحديث القائمة محلياً لحذف السجل من الواجهة فوراً دون الحاجة لإعادة الاتصال بالكامل
+      distributions.value = distributions.value.filter((d) => d.id !== id)
+    } catch (err) {
+      error.value = err.response?.data?.message || 'فشل في حذف سجل التوزيع.'
+      console.error(err)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     distributions,
     pagination,
@@ -78,5 +94,6 @@ export const useDistributionStore = defineStore('distribution', () => {
     fetchDistribution,
     createDistribution,
     updateDistribution,
+    deleteDistribution,
   }
 })

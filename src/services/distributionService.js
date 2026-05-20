@@ -1,3 +1,4 @@
+// src/services/distributionService.js
 import apiClient from './apiClient'
 
 const resource = '/distributions'
@@ -46,7 +47,13 @@ export default {
     })
   },
 
-  // لم نقم بإضافة دالة delete لأننا منعنا الحذف في الباك إند (Controller except destroy)
+  /**
+   * حذف سجل التوزيع كلياً وعكس الحركات المخزنية والمالية
+   * @param {string|number} id - معرف سجل التوزيع المراد حذفه
+   */
+  delete(id) {
+    return apiClient.delete(`${resource}/${id}`)
+  },
 
   // الدالة الخاصة بجلب إيصالات الأفراد (مفردة أو جماعية)
   // تم استخدام POST لإرسال مصفوفة الـ IDs في الـ Body بأمان
